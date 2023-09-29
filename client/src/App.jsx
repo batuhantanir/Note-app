@@ -1,35 +1,41 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useEffect } from "react";
+//Components
+import SearchInput from "./components/SearchInput.jsx";
+import AddNoteCard from "./components/AddNoteCard.jsx";
+import Notes from "./components/Notes.jsx";
+//Redux
+import { useDispatch, useSelector } from "react-redux";
+import { getNotesAsync } from "./redux/Note/NotesSlice.js";
+import Loading from "./components/Loading.jsx";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const dispatch = useDispatch();
+  const getNotesLoading = useSelector(
+    (state) => state.notes.getNotes.isLoading
+  );
+  const addNoteLoading = useSelector((state) => state.notes.addNote.isLoading);
+  const notes = useSelector((state) => state.notes.notes);
 
+  useEffect(() => {
+    dispatch(getNotesAsync());
+  }, [dispatch]);
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="flex flex-col items-center">
+      <h1 className="text-3xl text-gray-600 font-bold my-6">NotesApp</h1>
+      <SearchInput />
+      {addNoteLoading && <Loading title={"Adding Note.."} />}
+      <AddNoteCard />
+      {getNotesLoading ? (
+        <Loading title={"Loading..."} />
+      ) : notes.length != 0 ? (
+        <Notes />
+      ) : (
+        <h1 className="text-2xl text-gray-600 font-bold my-6">
+          No Notes Found
+        </h1>
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
